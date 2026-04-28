@@ -1,0 +1,16 @@
+#pip install -r requirements.txt
+
+numpy
+pandas
+scikit-learn
+seaborn
+matplotlib
+beautifulsoup4
+requests
+lxml
+plotly
+streamlit
+tqdm
+pyarrow
+
+# NEED TO FREEZE BEFORE SUBMISSION
