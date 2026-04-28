@@ -40,4 +40,3 @@ If you made some changes which work, use this :
 
 TBD
 
-## Authors
