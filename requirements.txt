@@ -12,5 +12,6 @@ plotly
 streamlit
 tqdm
 pyarrow
+polars
 
 # NEED TO FREEZE BEFORE SUBMISSION

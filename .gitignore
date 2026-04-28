@@ -1,0 +1,12 @@
+
+# what is written here is ignored by push to github
+
+.venv/
+__pycache__/
+*.pyc
+.env
+.ipynb_checkpoints/
+.DS_Store
+*.egg-info/
+data/raw_data/
+data/post_process_data
