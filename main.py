@@ -1,14 +1,22 @@
-# This is a sample Python script.
+from pathlib import Path
+from scripts.CHMU_downloader import download_weather_data
+import logging
+import pandas as pd
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from scripts.CHMU_station_ids import station_ids, url_creator
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
+)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+output_dir = Path("data/raw_data")
+download_weather_data(output_dir, "https://opendata.chmi.cz/meteorology/climate/historical_csv/metadata/meta1.csv")
 
-if __name__ == '__main__':
-    print_hi('PyCharm')
+df = pd.read_csv("data/raw_data/meta1.csv")
 
+ids = station_ids(df)
 
+url = url_creator("now","10m","20260503","0-20000-0-11518")
+
+download_weather_data(output_dir,url)
