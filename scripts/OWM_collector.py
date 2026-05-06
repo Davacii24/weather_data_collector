@@ -3,7 +3,7 @@
 # Collects: current weather + air quality for Prague
 import requests
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 load_dotenv()
 # ----- tbc ---------
@@ -17,15 +17,73 @@ API_KEY = os.getenv("OWM_API_KEY")
 
 def get_current_weather(api_key, lat, lon):
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
-    # Step 2: send request
-    # hint: exactly like your practice!
-    # response = requests.get(???)
+    response = requests.get(url)
+    data = response.json()
+    return data
 
-    # Step 3: return as dictionary
-    # hint: what method turns response into a dictionary?
-    pass
 
 def parse_weather_response(raw):
-    # raw is the messy nested dictionary from OWM
-    # this cleans and flattens it — exactly like Exercise 3!
-    pass
+    main = raw.get("main", {})
+    wind = raw.get("wind", {})
+    weather = raw.get("weather", [{}])
+    coord = raw.get("coord", {})
+
+    return {
+        "temperature": main.get("temp"),
+        "feels_like": main.get("feels_like"),
+        "humidity": main.get("humidity"),
+        "pressure": main.get("pressure"),
+        "wind_speed": wind.get("speed"),
+        "precipitation": raw.get("rain", {}).get("1h", 0.0),
+        "condition": weather[0].get("description"),
+        "city": raw.get("name"),
+        "lat": coord.get("lat"),
+        "lon": coord.get("lon"),
+        "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+# if __name__ == "__main__":
+#     # fetch raw data
+#     raw = get_current_weather(API_KEY, PRAGUE_LAT, PRAGUE_LON)
+#     # clean it
+#     clean = parse_weather_response(raw)
+#     print("CLEAN:", clean)
+
+# ----- Get air quality ----------
+def get_air_quality(api_key, lat, lon):
+    url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={api_key}"
+    response = requests.get(url)
+    data = response.json()
+    return data
+
+
+def parse_air_quality_response(raw):
+    components = raw.get("list", [{}])[0].get("components", {})
+    main = raw.get("list", [{}])[0].get("main", {})
+    coord = raw.get("coord", {})
+
+    return {
+        "aqi": main.get("aqi"),
+        "pm2_5": components.get("pm2_5"),
+        "pm10": components.get("pm10"),
+        "no2": components.get("no2"),
+        "o3": components.get("o3"),
+        "co": components.get("co"),
+        "so2": components.get("so2"),
+        "lat": coord.get("lat"),
+        "lon": coord.get("lon"),
+        "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+
+
+if __name__ == "__main__":
+    # weather
+    raw_weather = get_current_weather(API_KEY, PRAGUE_LAT, PRAGUE_LON)
+    clean_weather = parse_weather_response(raw_weather)
+    print("WEATHER:", clean_weather)
+
+    # air quality
+    raw_air = get_air_quality(API_KEY, PRAGUE_LAT, PRAGUE_LON)
+    clean_air = parse_air_quality_response(raw_air)
+    print("AIR QUALITY:", clean_air)
