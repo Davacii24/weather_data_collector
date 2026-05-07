@@ -56,9 +56,6 @@ def create_tables():
     print("Tables created!")
 
 
-if __name__ == "__main__":
-    create_tables()
-
 
 # --- insert data ------
 # to be continue
@@ -84,5 +81,32 @@ def insert_weather(data):
 
 def insert_air_quality(data):
     """Insert one air quality snapshot into owm_pollution table."""
-    # YOUR TURN — same pattern as insert_weather()!
-    pass
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO owm_pollution
+        (timestamp, lat, lon, aqi, pm2_5, pm10, no2, o3, co, so2)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        data["timestamp"], data["lat"], data["lon"],
+        data["aqi"], data["pm2_5"], data["pm10"],
+        data["no2"], data["o3"], data["co"], data["so2"]
+    ))
+    conn.commit()
+    conn.close()
+
+
+
+def check_data():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM owm_weather")
+    rows = cursor.fetchall()
+    print(f"Weather rows: {len(rows)}")
+    for row in rows:
+        print(row)
+    conn.close()
+
+if __name__ == "__main__":
+    create_tables()
+    check_data()

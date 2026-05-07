@@ -6,6 +6,7 @@ import os
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 load_dotenv()
+from OWM_database import insert_weather, insert_air_quality, create_tables
 # ----- tbc ---------
 # Prague coordinates — OWM needs lat/lon to know WHERE
 PRAGUE_LAT = 50.0755
@@ -77,13 +78,19 @@ def parse_air_quality_response(raw):
 
 
 
+
 if __name__ == "__main__":
-    # weather
+    # make sure tables exist
+    create_tables()
+
+    # collect weather
     raw_weather = get_current_weather(API_KEY, PRAGUE_LAT, PRAGUE_LON)
     clean_weather = parse_weather_response(raw_weather)
-    print("WEATHER:", clean_weather)
+    insert_weather(clean_weather)
+    print("Weather saved:", clean_weather)
 
-    # air quality
+    # collect air quality
     raw_air = get_air_quality(API_KEY, PRAGUE_LAT, PRAGUE_LON)
     clean_air = parse_air_quality_response(raw_air)
-    print("AIR QUALITY:", clean_air)
+    insert_air_quality(clean_air)
+    print("Air quality saved:", clean_air)
