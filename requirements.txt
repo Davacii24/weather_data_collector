@@ -13,5 +13,6 @@ streamlit
 tqdm
 pyarrow
 polars
+dotenv
 
 # NEED TO FREEZE BEFORE SUBMISSION

@@ -1,3 +1,4 @@
+from datetime import datetime
 import pandas as pd
 import logging
 
@@ -39,20 +40,53 @@ def station_ids(df):
 
 # FINISH THE URL_CREATOR.
 
-def url_creator(section,time_type,date,WSI_code):
+URL_PATTERNS = {
+    ("now","10m"): "{base}/now/data/10m-{wsi}-{date}.json",
+    ("now","1h") : "{base}/now/data/1h-{wsi}-{date}.json",
+    ###
+    ("recent","10min") : "{base}/recent/data/10min/10m-{wsi}-{date}.json",
+    ("recent","1hour") : "{base}/recent/data/1hour/1h-{wsi}-{date}.json",
+    ("recent","daily") : "{base}/recent/data/daily/dly-{wsi}-{date}.json",
+    ("recent","daily_old") : "{base}/recent/data/daily/{MM}/dly-{wsi}-{date}.json",
+    ###
+    ("historical","monthly") : "{base}/historical/data/monthly/mly-{wsi}.json",
+    ####
 
-    base = "https://opendata.chmi.cz/meteorology/climate/"
-    section = section
-    time_type = f"{time_type}"
-    WSI_code = f"{WSI_code}"
-    date = f"{date}"
+    ("historical_csv","10m") : "{base}/historical_csv/data/10m-{wsi}-{date}.csv",
+    ("historical_csv","1h") : "{base}/historical_csv/data/1h-{wsi}-{date}.csv",
+    ("historical_csv","daily") : "{base}/historical_csv/data/daily-{wsi}-{date}.csv",
+    #("historical_csv","monthly") : "{base}/historical_csv/data/monthly-{wsi}-{date}.csv",
+    ("historical_csv","yearly") : "{base}/historical_csv/data/yearly-{wsi}-{date}.csv",
+}
 
-    if section == "now":
-        if time_type == "10m":
-            url = f"{base}{section}/data/{time_type}-{WSI_code}-{date}.json"
+def url_creator(section,date,time_type,WSI_code):
+    """
+    this function will create the url from the section and date, which is used to download the data
+
+    Args:
+        section (string): the section names : now, recent, historical_csv
+        date (string): the date of the data : its must in a format YYYY-MM-DD like 2020506
+        time_type (string): the time type of the data which could be from 10 minutes to yearly data
+        WSI_code (string): the WSI code of the station
+
+    Returns:
+          returns the URL created, or if error return the needed patterns.
+    """
+
+    try:
+        url = URL_PATTERNS[(section,time_type)]
+    except KeyError:
+        logger.error(f"Invalid arguments, {section},{time_type} must be one of {list(URL_PATTERNS.keys())}")
+        return
+
+    base = "https://opendata.chmi.cz/meteorology/climate"
+
+    todays_month = datetime.today().month
+    if int(date[-2:]) != todays_month:
+        url = URL_PATTERNS[("recent","daily_old")]
+        url = url.format(base=base, MM = date[-2:] ,wsi=WSI_code,date=date)
     else:
-        logger.warning(f"the format was misspecified")
-        return ""
+        url = url.format(base=base,wsi=WSI_code,date=date)
 
     logger.info(f"url created: {url}")
     return url

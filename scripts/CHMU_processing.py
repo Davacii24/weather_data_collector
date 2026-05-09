@@ -1,0 +1,116 @@
+import pandas as pd
+
+class ParsedTableProcessing:
+    def __init__(self, filepath_processed,list_of_processed):
+        self._filepath_processed = filepath_processed
+        self._list_of_dfs = list_of_processed
+
+    def concat_daily_tables(self):
+        self._concat_df = pd.concat(self._list_of_dfs)
+        self._concat_df.reset_index(inplace=True)
+        self._concat_df = self._concat_df.sort_index()
+
+        self._station_names()
+        self._concat_df.columns.name = None
+        self._concat_df = self._concat_df.drop(columns=['index'], errors='ignore')
+        self._concat_df = self._concat_df.sort_values(["DATE", "station"])
+        self._concat_df = self._concat_df.rename(columns={"DATE": "date"})
+
+        self._rename_columns()
+
+        return self
+
+    def _rename_columns(self):
+        DAILY_COLUMNS = {
+            "Casmax_00:00": "sunshine_duration",
+            "Dmax_00:00": "wind_dir_at_gust",
+            "E_AVG": "vapour_pressure_avg",
+            "F_AVG": "wind_speed_avg",
+            "Fmax_00:00": "wind_gust_max",
+            "H_AVG": "humidity_avg",
+            "P_AVG": "pressure_avg",
+            "SSV_00:00": "snow_depth",
+            "T_AVG": "temp_avg",
+            "API30_06:00": "precip_index_30d",
+            "SCE_06:00": "snow_water_equiv",
+            "SCEdif_06:00": "snow_water_equiv_change",
+            "SNO_06:00": "new_snow_depth",
+            "SRA_06:00": "precipitation",
+            "SVH_06:00": "total_snow_depth",
+            "TMInoc_06:00": "temp_overnight_min",
+            "TPM_06:00": "temp_ground_surface",
+            "TMA_20:00": "temp_max",
+            "TMI_20:00": "temp_min",
+            "RGLB_D_SUM": "global_radiation_sum",
+            "T05_AVG": "soil_temp_5cm_avg",
+            "T10_AVG": "soil_temp_10cm_avg",
+            "T20_AVG": "soil_temp_20cm_avg",
+            "T50_AVG": "soil_temp_50cm_avg",
+            "T100_AVG": "soil_temp_100cm_avg",
+            "T05_06:00": "soil_temp_5cm_06AM",
+            "T10_06:00": "soil_temp_10cm_06AM",
+            "T20_06:00": "soil_temp_20cm_06AM",
+            "T50_06:00": "soil_temp_50cm_06AM",
+            "T100_06:00": "soil_temp_100cm_06AM",
+            "T05_20:00": "soil_temp_5cm_20PM",
+            "T10_20:00": "soil_temp_10cm_20PM",
+            "T20_20:00": "soil_temp_20cm_20PM",
+            "T50_20:00": "soil_temp_50cm_20PM",
+            "T100_20:00": "soil_temp_100cm_20PM",
+        }
+
+        SYNOPTIC_COLUMNS = {
+            "D10": "wind_direction",
+            "E": "vapour_pressure",
+            "F": "wind_speed",
+            "H": "humidity",
+            "P": "pressure",
+            "T": "temperature",
+        }
+
+        if "D10" in self._concat_df.columns:
+            self._concat_df = self._concat_df.rename(columns=SYNOPTIC_COLUMNS)
+            self._concat_df["date"] = self._concat_df["date"].dt.tz_localize(None)
+        else:
+            self._concat_df = self._concat_df.rename(columns=DAILY_COLUMNS)
+            self._concat_df["date"] = self._concat_df["date"].dt.date
+
+        return self
+
+    def _station_names(self):
+
+        STATION_NAMES = {
+            "0-20000-0-11518": "Praha-Ruzyne",
+            "0-20000-0-11519": "Praha-Karlov",
+            "0-20000-0-11520": "Praha-Libus",
+            "0-20000-0-11567": "Praha-Kbely",
+            "0-203-0-10904013001": "Praha-Komorany",
+            "0-203-0-11105048001": "Praha-Zadni Kopanina",
+            "0-203-0-11201020001": "Praha-Vinohrady",
+            "0-203-0-11201020003": "Praha-Chodov",
+            "0-203-0-11201024001": "Praha-Brevnov",
+            "0-203-0-11202007001": "Praha-Suchdol",
+            "0-203-0-11514": "Praha-Klementinum",
+            "0-203-0-11515": "Praha-Klementinum II",
+        }
+
+        RICHNESS = {
+            "Praha-Ruzyne": "LARGE",
+            "Praha-Karlov": "LARGE",
+            "Praha-Libus" : "LARGE",
+            "Praha-Kbely" : "LARGE",
+            "Praha-Komorany" : "MEDIUM",
+            "Praha-Zadni Kopanina" : "MINIMUM",
+            "Praha-Vinohrady" : "MEDIUM",
+            "Praha-Chodov" : "MINIMUM",
+            "Praha-Brevnov" : "MINIMUM",
+            "Praha-Suchdol": "MINIMUM",
+            "Praha-Klementinum" : "MEDIUM",
+            "Praha-Klementinum II" : "MINIMUM",
+        }
+
+        self._concat_df = self._concat_df.rename(columns={"STATION": "station"})
+        self._concat_df["station"] = self._concat_df["station"].map(STATION_NAMES)
+        self._concat_df["data_richness"] = self._concat_df["station"].map(RICHNESS)
+
+        return self

@@ -10,3 +10,6 @@ __pycache__/
 *.egg-info/
 data/raw_data/
 data/post_process_data
+FINISH_LATER.md
+scripts/temp - PARSING_DAILY_DATA.ipynb
+scripts/temp - CHMU_station_ids.ipynb

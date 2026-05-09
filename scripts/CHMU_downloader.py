@@ -24,7 +24,7 @@ def download_weather_data(output_dir, weather_url):
         output_dir: Directory to save the downloaded file.
         arg weather_url: URL of the specified folder in CHMU
     Returns:
-        Returns a nice messege when succsefull
+        Returns a nice message when succsefull
     """
 
     # raise error block, attempts download, raises error
