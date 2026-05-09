@@ -5,7 +5,7 @@ import sqlite3
 import os
 
 # database lives in data/weather.db
-DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "weather.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "local_weather.db")
 # create
 def get_connection():
     """Returns a connection to the database."""
