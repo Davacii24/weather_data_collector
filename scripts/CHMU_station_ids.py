@@ -44,10 +44,14 @@ URL_PATTERNS = {
     ("now","10m"): "{base}/now/data/10m-{wsi}-{date}.json",
     ("now","1h") : "{base}/now/data/1h-{wsi}-{date}.json",
     ###
+
+    ("recent","1hour_old") : "{base}/recent/data/1hour/{MM}/1h-{wsi}-{date}.json",
+    ("recent","10min_old") : "{base}/recent/data/10min/{MM}/10m-{wsi}-{date}.json",
     ("recent","10min") : "{base}/recent/data/10min/10m-{wsi}-{date}.json",
     ("recent","1hour") : "{base}/recent/data/1hour/1h-{wsi}-{date}.json",
     ("recent","daily") : "{base}/recent/data/daily/dly-{wsi}-{date}.json",
     ("recent","daily_old") : "{base}/recent/data/daily/{MM}/dly-{wsi}-{date}.json",
+
     ###
     ("historical","monthly") : "{base}/historical/data/monthly/mly-{wsi}.json",
     ####
@@ -82,9 +86,20 @@ def url_creator(section,date,time_type,WSI_code):
     base = "https://opendata.chmi.cz/meteorology/climate"
 
     todays_month = datetime.today().month
-    if int(date[-2:]) != todays_month:
-        url = URL_PATTERNS[("recent","daily_old")]
-        url = url.format(base=base, MM = date[-2:] ,wsi=WSI_code,date=date)
+    if int(date[4:6]) != todays_month:
+        if time_type=="daily":
+            # Past-month files aggregate all data for one month -> YYYYMM format
+            date = date[0:6]
+            url = URL_PATTERNS[("recent","daily_old")]
+            url = url.format(base=base, MM = date[4:6] ,wsi=WSI_code,date=date)
+        elif time_type=="10min":
+            date = date[0:6]
+            url = URL_PATTERNS[("recent","10min_old")]
+            url = url.format(base=base, MM=date[4:6], wsi=WSI_code, date=date)
+        elif time_type=="1hour":
+            date = date[0:6]
+            url = URL_PATTERNS[("recent","1hour_old")]
+            url = url.format(base=base, MM=date[4:6], wsi=WSI_code, date=date)
     else:
         url = url.format(base=base,wsi=WSI_code,date=date)
 

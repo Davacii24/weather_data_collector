@@ -1,10 +1,16 @@
 # GOAL FOR TODAY : 1. Make downloading from python
 #                : 2. Basic Parsing
+import time
+from datetime import datetime
 
 import requests
 from pathlib import Path
 import json
 import logging
+
+from envs.r_env.Lib.asyncio import sleep
+
+from scripts.CHMU_station_ids import url_creator
 
 #logging setup
 logger = logging.getLogger(__name__)
@@ -58,5 +64,35 @@ def download_weather_data(output_dir, weather_url):
 
     logger.info("Success! %s downloaded to : %s", filename, file_path)
     return
+
+def batch_downloader(station_ids,section,time_type, date_from):
+
+    end_month = datetime.today().month
+    start_month = date_from[4:6]
+    dates = range(int(start_month),end_month )
+
+    months = []
+    for i in dates:
+        x = (f"{date_from[0:4]}{i:02d}")
+        months.append(x)
+
+    for month in months:
+        for wsi in station_ids:
+            url = url_creator(section,month,time_type,wsi)
+            download_weather_data(output_dir, url)
+            time.sleep(1)
+
+    dates = range(1, datetime.today().day)
+    days = [f"{date_from[0:4]}{end_month:02d}{i:02d}" for i in dates]
+
+    for day in days:
+        for wsi in station_ids:
+            url = url_creator(section, day, time_type, wsi)
+            download_weather_data(output_dir, url)
+            time.sleep(1)
+
+
+
+
 
 

@@ -5,7 +5,7 @@ class ParsedTableProcessing:
         self._filepath_processed = filepath_processed
         self._list_of_dfs = list_of_processed
 
-    def concat_daily_tables(self):
+    def concat_tables(self):
         self._concat_df = pd.concat(self._list_of_dfs)
         self._concat_df.reset_index(inplace=True)
         self._concat_df = self._concat_df.sort_index()
@@ -29,7 +29,7 @@ class ParsedTableProcessing:
             "Fmax_00:00": "wind_gust_max",
             "H_AVG": "humidity_avg",
             "P_AVG": "pressure_avg",
-            "SSV_00:00": "snow_depth",
+            "SSV_00:00": "sunshine_hours",
             "T_AVG": "temp_avg",
             "API30_06:00": "precip_index_30d",
             "SCE_06:00": "snow_water_equiv",
@@ -68,9 +68,51 @@ class ParsedTableProcessing:
             "T": "temperature",
         }
 
+        HIGH_FREQUENCY_COLUMNS = {
+
+            "E": "vapour_pressure",
+            "N": "total_cloud_cover",
+            "P_hm": "pressure_station_level",
+            "SRA1H": "precipitation_hourly",
+            "SSV1H": "sunshine_duration_hourly",
+            "Td": "dew_point_temperature",
+            "VV": "visibility",
+            "W1": "past_weather_1",
+            "W2": "past_weather_2",
+            "ppp": "pressure_tendency",
+            "ww": "present_weather_code",
+            "RGLB1H": "global_radiation_hourly",
+            "C-MLAv": "mixing_layer_height_avg",
+            "C-MLI": "mixing_layer_indicator",
+            "T": "temperature",
+            "TMA": "temp_max",
+            "TMI": "temp_min",
+            "TPM": "temp_ground_surface",
+            "H": "humidity",
+            "P": "pressure",
+            "SSV10M": "sunshine_duration_10min",
+            "SRA10M": "precipitation_10min",
+            "D": "wind_direction",
+            "F": "wind_speed",
+            "Dprum": "wind_direction_avg",
+            "Fprum": "wind_speed_avg",
+            "Dmax": "wind_dir_at_gust",
+            "Fmax": "wind_gust_max",
+            "Casmax": "sunshine_sensor_duration",
+            "RGLB10": "global_radiation_10min",
+            "T05": "soil_temp_5cm",
+            "T10": "soil_temp_10cm",
+            "T20": "soil_temp_20cm",
+            "T50": "soil_temp_50cm",
+            "T100": "soil_temp_100cm",
+        }
+
+
         if "D10" in self._concat_df.columns:
             self._concat_df = self._concat_df.rename(columns=SYNOPTIC_COLUMNS)
             self._concat_df["date"] = self._concat_df["date"].dt.tz_localize(None)
+        elif "SSV1H" in self._concat_df.columns or "SSV10M" in self._concat_df.columns:
+            self._concat_df = self._concat_df.rename(columns=HIGH_FREQUENCY_COLUMNS)
         else:
             self._concat_df = self._concat_df.rename(columns=DAILY_COLUMNS)
             self._concat_df["date"] = self._concat_df["date"].dt.date

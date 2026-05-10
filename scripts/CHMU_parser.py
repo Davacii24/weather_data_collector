@@ -24,14 +24,14 @@ class CHMUAutoParser:
             return self._parse_highfreq_data()
 
     def _parse_daily_data(self):
-        print("Parsing daily data...")
+        #print("Parsing daily data...")
 
         column_names = str.split(self._raw_data["data"]["data"]["header"],sep = ",")
 
         df = (
             pd.DataFrame(data = self._raw_data["data"]["data"]["values"] , columns = column_names)
             .assign(ELEMENT_VTYPE = lambda x: x["ELEMENT"] + "_" + x["VTYPE"])
-            .drop(columns=["FLAG","QUALITY"])
+            .drop(columns=["FLAG","QUALITY"],errors="ignore")
             )
 
         daily_table = (
@@ -112,4 +112,21 @@ class CHMUAutoParser:
         return daily_table, daily_series_table
 
     def _parse_highfreq_data(self):
-        print("Parsing high frequency data")
+        #print("Parsing high frequency data")
+
+        column_names = str.split(self._raw_data["data"]["data"]["header"], sep=",")
+        high_freq_table = (
+            pd.DataFrame(data = self._raw_data["data"]["data"]["values"] , columns = column_names)
+            .drop(columns=["FLAG", "QUALITY"], errors="ignore")
+            .pivot(index="DT",columns= ["ELEMENT"],values="VAL")
+            .reset_index()
+            .rename(columns={"DT": "DATE"})
+            .assign(DATE=lambda x: pd.to_datetime(x["DATE"]).dt.tz_localize(None))
+            .assign(STATION=self._station_ids)
+        )
+        high_freq_table.columns.name = None
+        cols = high_freq_table.columns.difference(["DATE", "STATION"])
+        high_freq_table[cols] = high_freq_table[cols].apply(pd.to_numeric, errors="coerce")
+
+        return high_freq_table
+
