@@ -26,6 +26,9 @@ jobs:
           OWM_API_KEY: ${{ secrets.OWM_API_KEY }}
         run: python scripts/OWM_collector.py
 
+      - name: Run Open-Meteo collector
+        run: python scripts/open_meteo_collector.py
+
       - name: Commit updated database
         run: |
           git config user.name "github-actions"
