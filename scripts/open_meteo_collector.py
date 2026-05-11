@@ -5,13 +5,12 @@
 
 import requests
 from datetime import datetime, timezone
-from OWM_database import create_tables, get_connection
+from OWM_database import create_tables, insert_open_meteo
 
 # Prague coordinates
 PRAGUE_LAT = 50.0755
 PRAGUE_LON = 14.4378
 
-from OWM_database import create_tables, insert_open_meteo
 
 def get_current_weather():
     url = (
