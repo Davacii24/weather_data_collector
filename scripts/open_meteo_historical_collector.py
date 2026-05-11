@@ -71,26 +71,62 @@ def fetch_all_historical():
     return all_rows
 
 
+# if __name__ == "__main__":
+#     create_tables()
+#     total_rows = 0
+#     years_to_test = list(range(2022, 2025))
+#
+#     for i, year in enumerate(years_to_test):
+#         start_date = f"{year}-01-01"
+#         end_date = f"{year}-12-31"
+#
+#         print(f"[{i + 1}/{len(years_to_test)}] Fetching {year}...", end=" ")
+#
+#         raw = fetch_chunk(start_date, end_date)
+#         rows = parse_chunk(raw)
+#
+#         # save each row to database
+#         for row in rows:
+#             insert_open_meteo(row)
+#
+#         total_rows += len(rows)
+#         print(f" {len(rows)} rows saved (total: {total_rows})")
+#         time.sleep(1)
+#
+#     print(f"\nDone! {total_rows} rows saved to database!")
+
 if __name__ == "__main__":
     create_tables()
     total_rows = 0
-    years_to_test = list(range(2022, 2025))
+    start_year = 2026  # ← just 2026 needed!
+    end_year = date.today().year
+    years = list(range(start_year, end_year + 1))
 
-    for i, year in enumerate(years_to_test):
+    for i, year in enumerate(years):
         start_date = f"{year}-01-01"
-        end_date = f"{year}-12-31"
 
-        print(f"[{i + 1}/{len(years_to_test)}] Fetching {year}...", end=" ")
+        # current year → only up to yesterday
+        if year == date.today().year:
+            from datetime import timedelta
+
+            yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+            end_date = yesterday
+        else:
+            end_date = f"{year}-12-31"
+
+        print(f"[{i + 1}/{len(years)}] Fetching {year}...", end=" ")
 
         raw = fetch_chunk(start_date, end_date)
+        if raw is None:
+            print(f"⚠️ Skipping {year}")
+            continue
         rows = parse_chunk(raw)
 
-        # save each row to database
         for row in rows:
             insert_open_meteo(row)
 
         total_rows += len(rows)
-        print(f" {len(rows)} rows saved (total: {total_rows})")
+        print(f"✅ {len(rows)} rows saved (total: {total_rows})")
         time.sleep(1)
 
-    print(f"\nDone! {total_rows} rows saved to database!")
+    print(f"\nDone! {total_rows} rows saved!")
