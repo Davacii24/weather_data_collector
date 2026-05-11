@@ -95,38 +95,70 @@ def fetch_all_historical():
 #
 #     print(f"\nDone! {total_rows} rows saved to database!")
 
+# if __name__ == "__main__":
+#     create_tables()
+#     total_rows = 0
+#     start_year = 2026  # ← just 2026 needed!
+#     end_year = date.today().year
+#     years = list(range(start_year, end_year + 1))
+#
+#     for i, year in enumerate(years):
+#         start_date = f"{year}-01-01"
+#
+#         # current year → only up to yesterday
+#         if year == date.today().year:
+#             from datetime import timedelta
+#
+#             yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+#             end_date = yesterday
+#         else:
+#             end_date = f"{year}-12-31"
+#
+#         print(f"[{i + 1}/{len(years)}] Fetching {year}...", end=" ")
+#
+#         raw = fetch_chunk(start_date, end_date)
+#         if raw is None:
+#             print(f"⚠️ Skipping {year}")
+#             continue
+#         rows = parse_chunk(raw)
+#
+#         for row in rows:
+#             insert_open_meteo(row)
+#
+#         total_rows += len(rows)
+#         print(f"✅ {len(rows)} rows saved (total: {total_rows})")
+#         time.sleep(1)
+#
+#     print(f"\nDone! {total_rows} rows saved!")
+
 if __name__ == "__main__":
     create_tables()
     total_rows = 0
-    start_year = 2026  # ← just 2026 needed!
-    end_year = date.today().year
-    years = list(range(start_year, end_year + 1))
+    from datetime import timedelta
 
-    for i, year in enumerate(years):
+    # fetch missing years
+    missing_years = list(range(1940, 2022)) + [2025]
+
+    for i, year in enumerate(missing_years):
         start_date = f"{year}-01-01"
-
-        # current year → only up to yesterday
-        if year == date.today().year:
-            from datetime import timedelta
-
-            yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
-            end_date = yesterday
-        else:
-            end_date = f"{year}-12-31"
-
-        print(f"[{i + 1}/{len(years)}] Fetching {year}...", end=" ")
-
+        end_date = f"{year}-12-31"
+        print(f"[{i+1}/{len(missing_years)}] Fetching {year}...", end=" ")
         raw = fetch_chunk(start_date, end_date)
-        if raw is None:
-            print(f"⚠️ Skipping {year}")
-            continue
         rows = parse_chunk(raw)
-
         for row in rows:
             insert_open_meteo(row)
-
         total_rows += len(rows)
-        print(f"✅ {len(rows)} rows saved (total: {total_rows})")
+        print(f"✅ {len(rows)} rows (total: {total_rows})")
         time.sleep(1)
+
+    # handle 2026 separately
+    yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+    print(f"Fetching 2026...", end=" ")
+    raw = fetch_chunk("2026-01-01", yesterday)
+    rows = parse_chunk(raw)
+    for row in rows:
+        insert_open_meteo(row)
+    total_rows += len(rows)
+    print(f"✅ {len(rows)} rows (total: {total_rows})")
 
     print(f"\nDone! {total_rows} rows saved!")
