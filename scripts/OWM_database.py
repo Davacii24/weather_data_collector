@@ -64,7 +64,8 @@ def create_tables():
                        precipitation          REAL,
                        cloud_cover            INTEGER,
                        shortwave_radiation    REAL,
-                       weather_code           INTEGER
+                       weather_code           INTEGER,
+                       soil_temperature         REAL
                    )
                    """)
 
@@ -121,14 +122,14 @@ def insert_open_meteo(data):
         INSERT INTO open_meteo_hourly
         (timestamp, lat, lon, temperature, humidity,
          wind_speed, precipitation, cloud_cover,
-         shortwave_radiation, weather_code)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         shortwave_radiation, weather_code, soil_temperature)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data["timestamp"], data["lat"], data["lon"],
         data["temperature"], data["humidity"],
         data["wind_speed"], data["precipitation"],
         data["cloud_cover"], data["shortwave_radiation"],
-        data["weather_code"]
+        data["weather_code"], data["soil_temperature"]
     ))
     conn.commit()
     conn.close()

@@ -9,7 +9,7 @@ from OWM_database import insert_open_meteo, create_tables
 PRAGUE_LAT = 50.0755
 PRAGUE_LON = 14.4378
 
-VARIABLES = "temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,cloud_cover,shortwave_radiation,weather_code"
+VARIABLES = "temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,cloud_cover,shortwave_radiation,weather_code,soil_temperature_0_to_7cm"
 
 def fetch_chunk(start_date, end_date):
     """Fetch one chunk of historical data between two dates."""
@@ -39,6 +39,7 @@ def parse_chunk(raw):
             "cloud_cover": hourly["cloud_cover"][i],
             "shortwave_radiation": hourly["shortwave_radiation"][i],
             "weather_code": hourly["weather_code"][i],
+            "soil_temperature": hourly["soil_temperature_0_to_7cm"][i]
         }
         rows.append(row)
 
@@ -136,8 +137,7 @@ if __name__ == "__main__":
     total_rows = 0
     from datetime import timedelta
 
-    # fetch missing years
-    missing_years = list(range(1940, 2022)) + [2025]
+    missing_years = list(range(1940, 2026))
 
     for i, year in enumerate(missing_years):
         start_date = f"{year}-01-01"
