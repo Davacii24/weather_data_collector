@@ -2,14 +2,14 @@
 # packages
 import requests
 import os
+import sqlite3
+import pandas as pd
 from datetime import datetime, timezone, date, timedelta
 from dotenv import load_dotenv
 load_dotenv()
 import logging
 logger = logging.getLogger(__name__)
 from owm_om_parser import OWMParser, OpenMeteoParser
-from OWM_database import insert_weather, insert_air_quality, create_tables, insert_open_meteo_hourly, insert_open_meteo_daily
-
 
 # prague coordinate for function collecting
 PRAGUE_LAT = 50.0755
@@ -116,3 +116,35 @@ def get_current_daily_weather_OM():
     except requests.exceptions.RequestException as e:
         logger.error("Failed to fetch Open-Meteo daily data: %s", e)
         return None
+
+from OWM_database import get_connection
+
+# formed into dataframe
+if __name__ == "__main__":
+    conn = get_connection()
+
+    # OWM weather
+    raw = get_current_weather_OWM(API_KEY, PRAGUE_LAT, PRAGUE_LON)
+    clean = OWMParser(raw).parse_weather()        # returns dictionary
+    pd.DataFrame([clean]).to_sql("owm_weather", conn, if_exists="append", index=False)
+    print("Weather saved")
+
+    # OWM air quality
+    raw = get_air_quality_OWM(API_KEY, PRAGUE_LAT, PRAGUE_LON)
+    clean = OWMParser(raw).parse_air_quality()    # returns dictionary
+    pd.DataFrame([clean]).to_sql("owm_pollution", conn, if_exists="append", index=False)
+    print("Air quality saved")
+
+    # Open-Meteo hourly
+    raw = get_current_hourly_weather_OM()
+    clean = OpenMeteoParser(raw).parse_hourly()   # returns dictionary
+    pd.DataFrame([clean]).to_sql("open_meteo_hourly", conn, if_exists="append", index=False)
+    print("Hourly saved")
+
+    # Open-Meteo daily
+    raw = get_current_daily_weather_OM()
+    clean = OpenMeteoParser(raw).parse_daily()    # returns dictionary
+    pd.DataFrame([clean]).to_sql("open_meteo_daily", conn, if_exists="append", index=False)
+    print("Daily saved")
+
+    conn.close()
