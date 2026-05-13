@@ -5,7 +5,10 @@ import os
 from datetime import datetime, timezone, date, timedelta
 from dotenv import load_dotenv
 load_dotenv()
-from OWM_database import insert_weather, insert_air_quality, create_tables
+import logging
+logger = logging.getLogger(__name__)
+from owm_om_parser import OWMParser, OpenMeteoParser
+from OWM_database import insert_weather, insert_air_quality, create_tables, insert_open_meteo_hourly, insert_open_meteo_daily
 
 
 # prague coordinate for function collecting
@@ -26,9 +29,14 @@ def get_current_weather_OWM(api_key, lat, lon):
             Raw JSON response as dictionary
         """
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
-    response = requests.get(url)
-    data = response.json()
-    return data
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        logger.info("Successfully fetched OWM weather data")
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error("Failed to fetch OWM weather: %s", e)
+        return None
 
 
 # collecting air quality from OWM
@@ -44,9 +52,14 @@ def get_air_quality_OWM(api_key, lat, lon):
             Raw JSON response as dictionary
         """
     url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={api_key}"
-    response = requests.get(url)
-    data = response.json()
-    return data
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        logger.info("Successfully fetched OWM weather data")
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error("Failed to fetch OWM weather: %s", e)
+        return None
 
 
 # collect current weather data from open-meteo
@@ -65,8 +78,14 @@ def get_current_hourly_weather_OM():
         f"cloud_cover,shortwave_radiation,soil_temperature_0_to_7cm,soil_temperature_7_to_28cm,soil_temperature_28_to_100cm"
         f"&timezone=UTC"
     )
-    response = requests.get(url)
-    return response.json()
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        logger.info("Successfully fetched Open-Meteo hourly data")
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error("Failed to fetch Open-Meteo hourly data: %s", e)
+        return None
 
 # collect current Daily data from open-meteo
 def get_current_daily_weather_OM():
@@ -89,5 +108,11 @@ def get_current_daily_weather_OM():
         f"soil_moisture_28_to_100cm_mean,snowfall_water_equivalent_sum"
         f"&timezone=UTC"
     )
-    response = requests.get(url)
-    return response.json()
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        logger.info("Successfully fetched Open-Meteo daily data for %s", yesterday)
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error("Failed to fetch Open-Meteo daily data: %s", e)
+        return None

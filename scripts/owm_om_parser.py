@@ -22,7 +22,7 @@ class OWMParser:
             "wind_speed": wind.get("speed"),
             "precipitation": self._raw.get("rain", {}).get("1h", 0.0),
             "condition": weather[0].get("description"),
-            "city": self._raw.get("name"),
+            "district": self._raw.get("name"),
         }
 
     def parse_air_quality(self):
@@ -68,8 +68,6 @@ class OpenMeteoParser:
         daily = self._raw.get("daily", {})
         return {
             "date": daily.get("time", [None])[0],
-            "lat": self._raw.get("latitude"),
-            "lon": self._raw.get("longitude"),
             "sunrise": daily.get("sunrise", [None])[0],
             "sunset": daily.get("sunset", [None])[0],
             "temperature_mean": daily.get("temperature_2m_mean", [None])[0],

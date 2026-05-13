@@ -43,12 +43,6 @@ def parse_weather_response(raw):
         "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     }
 
-# if __name__ == "__main__":
-#     # fetch raw data
-#     raw = get_current_weather(API_KEY, PRAGUE_LAT, PRAGUE_LON)
-#     # clean it
-#     clean = parse_weather_response(raw)
-#     print("CLEAN:", clean)
 
 # ----- Get air quality ----------
 def get_air_quality(api_key, lat, lon):

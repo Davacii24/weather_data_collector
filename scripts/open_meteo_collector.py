@@ -45,4 +45,4 @@ if __name__ == "__main__":
     raw = get_current_weather()
     clean = parse_response(raw)
     insert_open_meteo(clean)
-    print("✅ Live weather saved:", clean)
+    print(" Live weather saved:", clean)

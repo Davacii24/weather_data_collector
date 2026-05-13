@@ -119,7 +119,7 @@ def fetch_all_historical():
 #
 #         raw = fetch_chunk(start_date, end_date)
 #         if raw is None:
-#             print(f"⚠️ Skipping {year}")
+#             print(f"Skipping {year}")
 #             continue
 #         rows = parse_chunk(raw)
 #
@@ -127,7 +127,7 @@ def fetch_all_historical():
 #             insert_open_meteo(row)
 #
 #         total_rows += len(rows)
-#         print(f"✅ {len(rows)} rows saved (total: {total_rows})")
+#         print(f" {len(rows)} rows saved (total: {total_rows})")
 #         time.sleep(1)
 #
 #     print(f"\nDone! {total_rows} rows saved!")
@@ -148,7 +148,7 @@ if __name__ == "__main__":
         for row in rows:
             insert_open_meteo(row)
         total_rows += len(rows)
-        print(f"✅ {len(rows)} rows (total: {total_rows})")
+        print(f"{len(rows)} rows (total: {total_rows})")
         time.sleep(1)
 
     # handle 2026 separately
@@ -159,6 +159,6 @@ if __name__ == "__main__":
     for row in rows:
         insert_open_meteo(row)
     total_rows += len(rows)
-    print(f"✅ {len(rows)} rows (total: {total_rows})")
+    print(f"{len(rows)} rows (total: {total_rows})")
 
     print(f"\nDone! {total_rows} rows saved!")
