@@ -124,6 +124,10 @@ def get_current_daily_weather_OM():
 if __name__ == "__main__":
     conn = get_connection()
 
+    conn.execute("DROP TABLE IF EXISTS owm_weather;")
+    conn.execute("DROP TABLE IF EXISTS owm_pollution;")
+    conn.execute("DROP TABLE IF EXISTS open_meteo_hourly;")
+    conn.commit()
     # OWM weather
     raw = get_current_weather_OWM(API_KEY, PRAGUE_LAT, PRAGUE_LON)
     clean = OWMParser(raw).parse_weather()        # returns dictionary
