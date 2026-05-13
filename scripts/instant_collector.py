@@ -10,6 +10,7 @@ load_dotenv()
 import logging
 logger = logging.getLogger(__name__)
 from owm_om_parser import OWMParser, OpenMeteoParser
+from OWM_database import get_connection
 
 # prague coordinate for function collecting
 PRAGUE_LAT = 50.0755
@@ -117,7 +118,7 @@ def get_current_daily_weather_OM():
         logger.error("Failed to fetch Open-Meteo daily data: %s", e)
         return None
 
-from OWM_database import get_connection
+
 
 # formed into dataframe
 if __name__ == "__main__":
@@ -142,9 +143,12 @@ if __name__ == "__main__":
     print("Hourly saved")
 
     # Open-Meteo daily
-    raw = get_current_daily_weather_OM()
-    clean = OpenMeteoParser(raw).parse_daily()    # returns dictionary
-    pd.DataFrame([clean]).to_sql("open_meteo_daily", conn, if_exists="append", index=False)
-    print("Daily saved")
+    if datetime.now(timezone.utc).hour == 0:
+        raw = get_current_daily_weather_OM()
+        pd.DataFrame([OpenMeteoParser(raw).parse_daily()]).to_sql("open_meteo_daily", conn, if_exists="append",
+                                                                  index=False)
+        print("Daily saved")
+    else:
+        print("skipping")
 
     conn.close()
