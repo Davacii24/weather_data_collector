@@ -1,15 +1,41 @@
 import operator as op
 import json
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CHMUAutoParser:
+    """
+    The parser takes the raw JSON files, automatically detects what kind of file it is, parses it in the correct way and
+    returns back the parsed file.
+
+    It detects files based on whether they are high frequency or not.
+    """
+
     def __init__(self,filepath_raw, filepath_processed):
+        """
+        This sets the filepath to our path of the raw data.
+        """
         self.file_path_raw = filepath_raw
         self.file_path_processed = filepath_processed
 
     def load(self):
-        with open(self.file_path_raw,'r') as f:
-            self._raw_data = json.load(f)
+        """
+        the function loads the raw JSON file and flags it based on whether its a high frequency or not.
+        then the function also extracts the stations ids so we can later use them to name our data.
+
+        we also have a logger which handles errors when loading data
+        """
+        try:
+            with open(self.file_path_raw,'r') as f:
+                self._raw_data = json.load(f)
+        except FileNotFoundError:
+            logger.error("File not found: %s" , self.file_path_raw)
+            return
+        except json.decoder.JSONDecodeError:
+            logger.error("JSON is corrupted or empty: %s", self.file_path_raw)
+            return
 
         v_type = "VTYPE"
         self._v_type = op.contains(self._raw_data["data"]["data"]["header"], v_type)
@@ -18,14 +44,25 @@ class CHMUAutoParser:
         return self
 
     def parse(self):
+        """
+        this function routes the data to its correct parser, if it has the VTYPE, it goes to daily, if not
+        it goes to the high freq parser.
+        """
         if self._v_type:
             return self._parse_daily_data()
         else:
             return self._parse_highfreq_data()
 
     def _parse_daily_data(self):
-        #print("Parsing daily data...")
+        """
+        this function gets the daily data, cleans, enriches and parses the data into two tables.
+        why two? this is because the VTYPE data has some special properties which we needed to handle and this was
+        the best way to do it.
 
+        Returns:
+            daily_table : table with daily data
+            daily_series_table : table with synoptic data (6AM, 13PM, 20PM)
+        """
         column_names = str.split(self._raw_data["data"]["data"]["header"],sep = ",")
 
         df = (
@@ -112,8 +149,10 @@ class CHMUAutoParser:
         return daily_table, daily_series_table
 
     def _parse_highfreq_data(self):
-        #print("Parsing high frequency data")
-
+        """
+        this is our highfreq parser, it parser the high frequency data into a nice table, it is quite a bit less
+        complicated then the other parser as it has no special properties.
+        """
         column_names = str.split(self._raw_data["data"]["data"]["header"], sep=",")
         high_freq_table = (
             pd.DataFrame(data = self._raw_data["data"]["data"]["values"] , columns = column_names)

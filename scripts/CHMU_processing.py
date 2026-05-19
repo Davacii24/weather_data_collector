@@ -1,11 +1,31 @@
+import logging
 import pandas as pd
 
+logger = logging.getLogger(__name__)
+
+
 class ParsedTableProcessing:
+    """
+    This class takes a raw tables from the parser and processes them, renames them, and cocatinates them thogheter into
+    one continues table.
+    """
+
     def __init__(self, filepath_processed,list_of_processed):
+        """
+        Args:
+            filepath_processed (str): path to the output directory
+            list_of_processed (list): list of parsed DataFrames to be concatenated
+        """
         self._filepath_processed = filepath_processed
         self._list_of_dfs = list_of_processed
 
     def concat_tables(self):
+        """
+        this is our main function in the class, it also calls on the other functions automatically to: reset the index
+        after concatinating, renames stations names and enriches them, drops the index( so we the index become the date)
+        sort the dates so they are chronologically sorted, and renames all the columns so we know what the measurements
+        are in.
+        """
         self._concat_df = pd.concat(self._list_of_dfs)
         self._concat_df.reset_index(inplace=True)
         self._concat_df = self._concat_df.sort_index()
@@ -17,10 +37,15 @@ class ParsedTableProcessing:
         self._concat_df = self._concat_df.rename(columns={"DATE": "date"})
 
         self._rename_columns()
-
+        logger.info("Concatenated %d tables with %s rows", len(self._list_of_dfs), self._concat_df.shape[0])
         return self
 
     def _rename_columns(self):
+        """
+        this function renames the columns based on what category they belong to which we detect automatically.
+        it also handles timezone localization and date formatting depending on table type.
+        """
+
         DAILY_COLUMNS = {
             "Casmax_00:00": "sunshine_duration",
             "Dmax_00:00": "wind_dir_at_gust",
@@ -107,7 +132,6 @@ class ParsedTableProcessing:
             "T100": "soil_temp_100cm",
         }
 
-
         if "D10" in self._concat_df.columns:
             self._concat_df = self._concat_df.rename(columns=SYNOPTIC_COLUMNS)
             self._concat_df["date"] = self._concat_df["date"].dt.tz_localize(None)
@@ -120,6 +144,10 @@ class ParsedTableProcessing:
         return self
 
     def _station_names(self):
+        """
+        a simple function which maps the WSI codes to their station names and it also creates a new column which
+        says how data rich a stations is.
+        """
 
         STATION_NAMES = {
             "0-20000-0-11518": "Praha-Ruzyne",
