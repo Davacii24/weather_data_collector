@@ -124,7 +124,6 @@ def get_current_daily_weather_OM():
 if __name__ == "__main__":
     conn = get_connection()
 
-
     # OWM weather
     raw = get_current_weather_OWM(API_KEY, PRAGUE_LAT, PRAGUE_LON)
     clean = OWMParser(raw).parse_weather()        # returns dictionary

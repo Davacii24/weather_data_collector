@@ -1,164 +1,55 @@
-# open_meteo_historical.py
-# Fetches 80 years of historical hourly data from Open-Meteo
-
+import logging
+logger = logging.getLogger(__name__)
 import requests
-import time
-from datetime import datetime, date
-from OWM_database import insert_open_meteo, create_tables
 
+
+
+# prague coordinate for function collecting
 PRAGUE_LAT = 50.0755
 PRAGUE_LON = 14.4378
 
-VARIABLES = "temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,cloud_cover,shortwave_radiation,weather_code,soil_temperature_0_to_7cm"
 
-def fetch_chunk(start_date, end_date):
-    """Fetch one chunk of historical data between two dates."""
+def fetch_hourly_chunk(start_date, end_date):
+    """Fetch hourly historical data between two dates."""
     url = (
         f"https://archive-api.open-meteo.com/v1/archive"
         f"?latitude={PRAGUE_LAT}&longitude={PRAGUE_LON}"
         f"&start_date={start_date}&end_date={end_date}"
-        f"&hourly={VARIABLES}&timezone=UTC"
+        f"&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,"
+        f"precipitation,cloud_cover,shortwave_radiation,"
+        f"weather_code,soil_temperature_0_to_7cm"
+        f"&timezone=UTC"
     )
-    response = requests.get(url)
-    return response.json()
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        logger.info("Successfully fetched hourly data: %s to %s", start_date, end_date)
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error("Failed to fetch hourly data %s to %s: %s", start_date, end_date, e)
+        return None
 
 
-def parse_chunk(raw):
-    hourly = raw["hourly"]
-    rows = []
-
-    for i in range(len(hourly["time"])):
-        row = {
-            "timestamp": hourly["time"][i],
-            "lat": raw["latitude"],        # ← add this
-            "lon": raw["longitude"],       # ← add this
-            "temperature": hourly["temperature_2m"][i],
-            "humidity": hourly["relative_humidity_2m"][i],
-            "wind_speed": hourly["wind_speed_10m"][i],
-            "precipitation": hourly["precipitation"][i],
-            "cloud_cover": hourly["cloud_cover"][i],
-            "shortwave_radiation": hourly["shortwave_radiation"][i],
-            "weather_code": hourly["weather_code"][i],
-            "soil_temperature": hourly["soil_temperature_0_to_7cm"][i]
-        }
-        rows.append(row)
-
-    return rows
-
-
-
-def fetch_all_historical():
-    """Fetch all historical data year by year."""
-
-    start_year = 1940
-    end_year = date.today().year
-
-    all_rows = []
-
-    for year in range(start_year, end_year + 1):
-        start_date = f"{year}-01-01"
-        end_date = f"{year}-12-31"
-
-        print(f"Fetching {year}...")
-
-        raw = fetch_chunk(start_date, end_date)
-        rows = parse_chunk(raw)
-        all_rows.extend(rows)
-
-        print(f"  Got {len(rows)} rows")
-
-        time.sleep(1)  # wait 1 second between requests
-
-    return all_rows
-
-
-# if __name__ == "__main__":
-#     create_tables()
-#     total_rows = 0
-#     years_to_test = list(range(2022, 2025))
-#
-#     for i, year in enumerate(years_to_test):
-#         start_date = f"{year}-01-01"
-#         end_date = f"{year}-12-31"
-#
-#         print(f"[{i + 1}/{len(years_to_test)}] Fetching {year}...", end=" ")
-#
-#         raw = fetch_chunk(start_date, end_date)
-#         rows = parse_chunk(raw)
-#
-#         # save each row to database
-#         for row in rows:
-#             insert_open_meteo(row)
-#
-#         total_rows += len(rows)
-#         print(f" {len(rows)} rows saved (total: {total_rows})")
-#         time.sleep(1)
-#
-#     print(f"\nDone! {total_rows} rows saved to database!")
-
-# if __name__ == "__main__":
-#     create_tables()
-#     total_rows = 0
-#     start_year = 2026  # ← just 2026 needed!
-#     end_year = date.today().year
-#     years = list(range(start_year, end_year + 1))
-#
-#     for i, year in enumerate(years):
-#         start_date = f"{year}-01-01"
-#
-#         # current year → only up to yesterday
-#         if year == date.today().year:
-#             from datetime import timedelta
-#
-#             yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
-#             end_date = yesterday
-#         else:
-#             end_date = f"{year}-12-31"
-#
-#         print(f"[{i + 1}/{len(years)}] Fetching {year}...", end=" ")
-#
-#         raw = fetch_chunk(start_date, end_date)
-#         if raw is None:
-#             print(f"Skipping {year}")
-#             continue
-#         rows = parse_chunk(raw)
-#
-#         for row in rows:
-#             insert_open_meteo(row)
-#
-#         total_rows += len(rows)
-#         print(f" {len(rows)} rows saved (total: {total_rows})")
-#         time.sleep(1)
-#
-#     print(f"\nDone! {total_rows} rows saved!")
-
-if __name__ == "__main__":
-    create_tables()
-    total_rows = 0
-    from datetime import timedelta
-
-    missing_years = list(range(1940, 2026))
-
-    for i, year in enumerate(missing_years):
-        start_date = f"{year}-01-01"
-        end_date = f"{year}-12-31"
-        print(f"[{i+1}/{len(missing_years)}] Fetching {year}...", end=" ")
-        raw = fetch_chunk(start_date, end_date)
-        rows = parse_chunk(raw)
-        for row in rows:
-            insert_open_meteo(row)
-        total_rows += len(rows)
-        print(f"{len(rows)} rows (total: {total_rows})")
-        time.sleep(1)
-
-    # handle 2026 separately
-    yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
-    print(f"Fetching 2026...", end=" ")
-    raw = fetch_chunk("2026-01-01", yesterday)
-    rows = parse_chunk(raw)
-    for row in rows:
-        insert_open_meteo(row)
-    total_rows += len(rows)
-    print(f"{len(rows)} rows (total: {total_rows})")
-
-    print(f"\nDone! {total_rows} rows saved!")
+def fetch_daily_chunk(start_date, end_date):
+    """Fetch daily historical data between two dates."""
+    url = (
+        f"https://archive-api.open-meteo.com/v1/archive"
+        f"?latitude={PRAGUE_LAT}&longitude={PRAGUE_LON}"
+        f"&start_date={start_date}&end_date={end_date}"
+        f"&daily=sunrise,sunset,wind_gusts_10m_max,cloud_cover_mean,"
+        f"temperature_2m_mean,temperature_2m_max,temperature_2m_min,"
+        f"wind_speed_10m_max,daylight_duration,sunshine_duration,"
+        f"precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,"
+        f"wind_direction_10m_dominant,soil_moisture_0_to_100cm_mean,"
+        f"soil_moisture_0_to_7cm_mean,soil_moisture_28_to_100cm_mean,"
+        f"snowfall_water_equivalent_sum"
+        f"&timezone=UTC"
+    )
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        logger.info("Successfully fetched daily data: %s to %s", start_date, end_date)
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error("Failed to fetch daily data %s to %s: %s", start_date, end_date, e)
+        return None
