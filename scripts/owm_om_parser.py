@@ -89,4 +89,53 @@ class OpenMeteoParser:
             "soil_moisture_0_100cm": daily.get("soil_moisture_0_to_100cm_mean", [None])[0],
         }
 
+    # add to OpenMeteoParser class in owm_om_parser.py:
+
+    def parse_hourly_historical(self):
+        """Parse historical hourly response - returns list of dicts."""
+        hourly = self._raw.get("hourly", {})
+        rows = []
+        for i in range(len(hourly["time"])):
+            rows.append({
+                "timestamp": hourly["time"][i],
+                "temperature": hourly["temperature_2m"][i],
+                "humidity": hourly["relative_humidity_2m"][i],
+                "wind_speed": hourly["wind_speed_10m"][i],
+                "precipitation": hourly["precipitation"][i],
+                "cloud_cover": hourly["cloud_cover"][i],
+                "shortwave_radiation": hourly["shortwave_radiation"][i],
+                "weather_code": hourly["weather_code"][i],
+                "soil_temperature_0_to_7cm": hourly["soil_temperature_0_to_7cm"][i],
+            })
+        return rows
+
+    def parse_daily_historical(self):
+        """Parse historical daily response - returns list of dicts."""
+        daily = self._raw.get("daily", {})
+        rows = []
+        for i in range(len(daily["time"])):
+            rows.append({
+                "date": daily["time"][i],
+                "sunrise": daily["sunrise"][i],
+                "sunset": daily["sunset"][i],
+                "temperature_mean": daily["temperature_2m_mean"][i],
+                "temperature_max": daily["temperature_2m_max"][i],
+                "temperature_min": daily["temperature_2m_min"][i],
+                "wind_speed_max": daily["wind_speed_10m_max"][i],
+                "wind_gusts_max": daily["wind_gusts_10m_max"][i],
+                "wind_direction_dominant": daily["wind_direction_10m_dominant"][i],
+                "daylight_duration": daily["daylight_duration"][i],
+                "sunshine_duration": daily["sunshine_duration"][i],
+                "precipitation_sum": daily["precipitation_sum"][i],
+                "rain_sum": daily["rain_sum"][i],
+                "snowfall_sum": daily["snowfall_sum"][i],
+                "snowfall_water_equivalent": daily["snowfall_water_equivalent_sum"][i],
+                "precipitation_hours": daily["precipitation_hours"][i],
+                "cloud_cover_mean": daily["cloud_cover_mean"][i],
+                "soil_moisture_0_7cm": daily["soil_moisture_0_to_7cm_mean"][i],
+                "soil_moisture_28_100cm": daily["soil_moisture_28_to_100cm_mean"][i],
+                "soil_moisture_0_100cm": daily["soil_moisture_0_to_100cm_mean"][i],
+            })
+        return rows
+
 
