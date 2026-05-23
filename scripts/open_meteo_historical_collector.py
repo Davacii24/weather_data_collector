@@ -2,13 +2,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 import pandas as pd
-PRAGUE_LAT = 50.0755
-PRAGUE_LON = 14.4378
 import time
 import requests
 from owm_om_parser import OpenMeteoParser
 from OWM_database import get_connection
-from datetime import datetime, timezone, date, timedelta
+from datetime import date, timedelta
 
 
 
@@ -23,9 +21,9 @@ def fetch_hourly_chunk(start_date, end_date):
         f"https://archive-api.open-meteo.com/v1/archive"
         f"?latitude={PRAGUE_LAT}&longitude={PRAGUE_LON}"
         f"&start_date={start_date}&end_date={end_date}"
-        f"&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,"
-        f"precipitation,cloud_cover,shortwave_radiation,"
-        f"weather_code,soil_temperature_0_to_7cm"
+        f"&hourly=temperature_2m,relative_humidity_2m,"
+        f"wind_speed_10m,precipitation,weather_code,"
+        f"cloud_cover,shortwave_radiation,soil_temperature_0_to_7cm,soil_temperature_7_to_28cm,soil_temperature_28_to_100cm"
         f"&timezone=UTC"
     )
     try:
@@ -44,13 +42,11 @@ def fetch_daily_chunk(start_date, end_date):
         f"https://archive-api.open-meteo.com/v1/archive"
         f"?latitude={PRAGUE_LAT}&longitude={PRAGUE_LON}"
         f"&start_date={start_date}&end_date={end_date}"
-        f"&daily=sunrise,sunset,wind_gusts_10m_max,cloud_cover_mean,"
-        f"temperature_2m_mean,temperature_2m_max,temperature_2m_min,"
-        f"wind_speed_10m_max,daylight_duration,sunshine_duration,"
-        f"precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,"
-        f"wind_direction_10m_dominant,soil_moisture_0_to_100cm_mean,"
-        f"soil_moisture_0_to_7cm_mean,soil_moisture_28_to_100cm_mean,"
-        f"snowfall_water_equivalent_sum"
+        f"&daily=sunrise,sunset,wind_gusts_10m_max,cloud_cover_mean,temperature_2m_mean,"
+        f"temperature_2m_max,temperature_2m_min,wind_speed_10m_max,daylight_duration,"
+        f"sunshine_duration,precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,"
+        f"wind_direction_10m_dominant,soil_moisture_0_to_100cm_mean,soil_moisture_0_to_7cm_mean,"
+        f"soil_moisture_28_to_100cm_mean,snowfall_water_equivalent_sum"
         f"&timezone=UTC"
     )
     try:
@@ -101,7 +97,7 @@ if __name__ == "__main__":
         print(f"hourly: {total_hourly}, daily: {total_daily}")
         time.sleep(5)
 
-    conn.close()
+
     print(f"\nHourly: {total_hourly}, Daily: {total_daily}")
 
     # handle current year
@@ -119,3 +115,5 @@ if __name__ == "__main__":
         total_daily += len(rows)
 
     print(f"hourly: {total_hourly}, daily: {total_daily}")
+
+    conn.close()
