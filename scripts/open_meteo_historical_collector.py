@@ -1,6 +1,14 @@
 import logging
 logger = logging.getLogger(__name__)
+
+import pandas as pd
+PRAGUE_LAT = 50.0755
+PRAGUE_LON = 14.4378
+import time
 import requests
+from owm_om_parser import OpenMeteoParser
+from OWM_database import get_connection
+from datetime import datetime, timezone, date, timedelta
 
 
 
@@ -21,7 +29,7 @@ def fetch_hourly_chunk(start_date, end_date):
         f"&timezone=UTC"
     )
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=30)
         response.raise_for_status()
         logger.info("Successfully fetched hourly data: %s to %s", start_date, end_date)
         return response.json()
@@ -46,10 +54,68 @@ def fetch_daily_chunk(start_date, end_date):
         f"&timezone=UTC"
     )
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=30)
         response.raise_for_status()
         logger.info("Successfully fetched daily data: %s to %s", start_date, end_date)
         return response.json()
     except requests.exceptions.RequestException as e:
         logger.error("Failed to fetch daily data %s to %s: %s", start_date, end_date, e)
         return None
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
+    )
+
+    conn = get_connection()
+    total_hourly = 0
+    total_daily = 0
+    yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    # fetch 80 years historical data
+    years = list(range(1940, date.today().year))
+
+    for i, year in enumerate(years):
+        start_date = f"{year}-01-01"
+        end_date = f"{year}-12-31"
+        print(f"[{i + 1}/{len(years)}] Fetching {year}...", end=" ")
+
+        raw = fetch_hourly_chunk(start_date, end_date)
+        if raw is None:
+            print(f"Skipping {year}")
+            continue
+        rows = OpenMeteoParser(raw).parse_hourly_historical()
+        pd.DataFrame(rows).to_sql("open_meteo_hourly", conn, if_exists="append", index=False)
+        total_hourly += len(rows)
+
+        raw = fetch_daily_chunk(start_date, end_date)
+        if raw is None:
+            print(f"Skipping {year}")
+            continue
+        rows = OpenMeteoParser(raw).parse_daily_historical()
+        pd.DataFrame(rows).to_sql("open_meteo_daily", conn, if_exists="append", index=False)
+        total_daily += len(rows)
+
+        print(f"hourly: {total_hourly}, daily: {total_daily}")
+        time.sleep(5)
+
+    conn.close()
+    print(f"\nHourly: {total_hourly}, Daily: {total_daily}")
+
+    # handle current year
+    print(f"Fetching 2026...", end=" ")
+    raw = fetch_hourly_chunk("2026-01-01", yesterday)
+    if raw is not None:
+        rows = OpenMeteoParser(raw).parse_hourly_historical()
+        pd.DataFrame(rows).to_sql("open_meteo_hourly", conn, if_exists="append", index=False)
+        total_hourly += len(rows)
+
+    raw = fetch_daily_chunk("2026-01-01", yesterday)
+    if raw is not None:
+        rows = OpenMeteoParser(raw).parse_daily_historical()
+        pd.DataFrame(rows).to_sql("open_meteo_daily", conn, if_exists="append", index=False)
+        total_daily += len(rows)
+
+    print(f"hourly: {total_hourly}, daily: {total_daily}")
