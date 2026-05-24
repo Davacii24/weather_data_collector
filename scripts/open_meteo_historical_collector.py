@@ -71,7 +71,7 @@ if __name__ == "__main__":
     yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
 
     # fetch 80 years historical data
-    years = list(range(1940, date.today().year))
+    years = list(range(1996, 2007)) + list(range(2011, date.today().year))
 
     for i, year in enumerate(years):
         start_date = f"{year}-01-01"
