@@ -2,7 +2,7 @@ name: Collect Weather Data
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data/weather.db
+          git add data/weather_live.db
           git commit -m "auto: collect weather $(date -u '+%Y-%m-%d %H:%M')" || echo "No changes"
           git pull --rebase
           git push
