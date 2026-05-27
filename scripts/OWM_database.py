@@ -1,6 +1,3 @@
-# OWM_database.py
-# Creates and manages the SQLite database
-
 import sqlite3
 import os
 

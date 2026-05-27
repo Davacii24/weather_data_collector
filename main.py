@@ -8,6 +8,8 @@ import sqlite3
 from scripts.CHMU_processing import ParsedTableProcessing
 from scripts.CHMU_station_ids import station_ids, url_creator
 from scripts.CHMU_parser import CHMUAutoParser
+from scripts.OM_historical_downloader import OM_historical_downloader
+
 import time
 
 
@@ -50,8 +52,9 @@ raw_folder = Path("data/raw_data")
 output_dir = Path("data/raw_data")
 
 def main():
-    conn = sqlite3.connect("data/post_process_data/weather.db")
+    conn = sqlite3.connect("data/weather.db")
 
+    OM_historical_downloader(conn)
     batch_downloader(TENMIN_STATION_IDS, "recent", "10min", "202601",output_dir)
     batch_downloader(LARGE_STATION_IDS, "recent", "1hour", "202601",output_dir)
     batch_downloader(ids, "recent", "daily", "202601",output_dir)
@@ -60,7 +63,7 @@ def main():
         url = url_creator("historical","-","daily",wsi)
         download_weather_data(output_dir,url)
 
-    for year in range(2024,2026):
+    for year in range(2018,2026):
         batch_downloader(LARGE_STATION_IDS, "historical", "10min", str(year),output_dir)
 
     for wsi in TENMIN_STATION_IDS:

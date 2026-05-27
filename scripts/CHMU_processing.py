@@ -33,7 +33,7 @@ class ParsedTableProcessing:
         self._station_names()
         self._concat_df.columns.name = None
         self._concat_df = self._concat_df.drop(columns=['index'], errors='ignore')
-        self._concat_df = self._concat_df.sort_values(["DATE", "station"])
+        self._concat_df = self._concat_df.sort_values(["DATE", "station"],ascending=[False, True])
         self._concat_df = self._concat_df.rename(columns={"DATE": "date"})
 
         self._rename_columns()

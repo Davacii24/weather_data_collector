@@ -169,3 +169,14 @@ class CHMUAutoParser:
 
         return high_freq_table
 
+    @classmethod
+    def from_raw(cls, raw_data):
+        """
+        This function was created to parse the auto-updated data for the github actions.
+        """
+        parser = cls.__new__(cls)
+        parser._raw_data = raw_data
+        parser._v_type = "VTYPE" in raw_data["data"]["data"]["header"]
+        parser._station_ids = raw_data["data"]["data"]["values"][0][0]
+        return parser
+
