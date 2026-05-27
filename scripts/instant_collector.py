@@ -68,7 +68,7 @@ def get_current_weather_OWM(api_key, lat, lon):
         """
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
     try:
-        response = requests.get(url)
+        response = requests.get(url,timeout=30)
         response.raise_for_status()
         logger.info("Successfully fetched OWM weather data")
         return response.json()
@@ -91,7 +91,7 @@ def get_air_quality_OWM(api_key, lat, lon):
         """
     url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={api_key}"
     try:
-        response = requests.get(url)
+        response = requests.get(url,timeout=30)
         response.raise_for_status()
         logger.info("Successfully fetched OWM weather data")
         return response.json()
@@ -117,7 +117,7 @@ def get_current_hourly_weather_OM():
         f"&timezone=UTC"
     )
     try:
-        response = requests.get(url)
+        response = requests.get(url,timeout=30)
         response.raise_for_status()
         logger.info("Successfully fetched Open-Meteo hourly data")
         return response.json()
@@ -147,7 +147,7 @@ def get_current_daily_weather_OM():
         f"&timezone=UTC"
     )
     try:
-        response = requests.get(url)
+        response = requests.get(url,timeout=30)
         response.raise_for_status()
         logger.info("Successfully fetched Open-Meteo daily data for %s", yesterday)
         return response.json()
@@ -189,7 +189,7 @@ if __name__ == "__main__":
         minute_process._concat_df.to_sql("minute", conn, if_exists="append", index=False)
         logger.info("CHMU 10min saved")
 
-    #if now.minute < 15:
+    if now.minute < 15:
         conn.execute(f"DELETE FROM hourly WHERE date >= '{today}'")
         #CHMU hourly
 
@@ -234,7 +234,7 @@ if __name__ == "__main__":
             pd.DataFrame([clean]).to_sql("open_meteo_hourly", conn, if_exists="append", index=False)
             logger.info("Hourly data saved")
 
-    #if now.hour == 8 and now.minute < 10:
+    if now.hour == 8 and now.minute < 10:
 
         current_month = datetime.today().strftime("%Y-%m")
         conn.execute(f"DELETE FROM daily WHERE date >= '{current_month}-01'")
