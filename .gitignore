@@ -1,4 +1,3 @@
-
 # what is written here is ignored by push to github
 
 .venv/
@@ -9,9 +8,9 @@ __pycache__/
 .DS_Store
 *.egg-info/
 data/raw_data/
-data/post_process_data
+data/post_process_data/
 FINISH_LATER.md
-scripts/temp - PARSING_DAILY_DATA.ipynb
-scripts/temp - CHMU_station_ids.ipynb
-*.ipynbdata/weather.db
-
+*.ipynb
+data/weather.db
+data/post_process_data/weather_first.db
+data/post_process_data/weather_second.db
