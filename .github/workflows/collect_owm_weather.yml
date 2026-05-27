@@ -24,7 +24,7 @@ jobs:
       - name: Run instant collector
         env:
           OWM_API_KEY: ${{ secrets.OWM_API_KEY }}
-        run: python scripts/instant_collector.py
+        run: PYTHONPATH=. python scripts/instant_collector.py
 
       - name: Commit updated database
         run: |
