@@ -189,52 +189,52 @@ if __name__ == "__main__":
         minute_process._concat_df.to_sql("minute", conn, if_exists="append", index=False)
         logger.info("CHMU 10min saved")
 
-    if now.minute < 15:
-        conn.execute(f"DELETE FROM hourly WHERE date >= '{today}'")
-        #CHMU hourly
 
-        hourly_list = []
-        for wsi in LARGE_STATION_IDS:
-            url = url_creator("now", datetime.today().strftime("%Y%m%d"), "1h", wsi)
-            try:
-                response = requests.get(url, timeout=30)
-                response.raise_for_status()
-                raw = response.json()
-                parser = CHMUAutoParser.from_raw(raw)
-                df = parser.parse()
-                hourly_list.append(df)
-                logger.info("CHMU 1h fetched for %s", wsi)
-            except requests.exceptions.RequestException as e:
-                logger.error("Failed to fetch CHMU 1h for %s: %s", wsi, e)
+    conn.execute(f"DELETE FROM hourly WHERE date >= '{today}'")
+    #CHMU hourly
 
-        if hourly_list:
-            hourly_process = ParsedTableProcessing("", hourly_list)
-            hourly_process.concat_tables()
-            hourly_process._concat_df.to_sql("hourly", conn, if_exists="append", index=False)
-            logger.info("CHMU 1h saved")
+    hourly_list = []
+    for wsi in LARGE_STATION_IDS:
+        url = url_creator("now", datetime.today().strftime("%Y%m%d"), "1h", wsi)
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            raw = response.json()
+            parser = CHMUAutoParser.from_raw(raw)
+            df = parser.parse()
+            hourly_list.append(df)
+            logger.info("CHMU 1h fetched for %s", wsi)
+        except requests.exceptions.RequestException as e:
+            logger.error("Failed to fetch CHMU 1h for %s: %s", wsi, e)
 
-        # OWM weather
-        raw = get_current_weather_OWM(API_KEY, PRAGUE_LAT, PRAGUE_LON)
-        if raw is not None:
-            clean = OWMParser(raw).parse_weather()        # returns dictionary
-            pd.DataFrame([clean]).to_sql("owm_weather", conn, if_exists="append", index=False)
-            logger.info("OWM weather data saved")
+    if hourly_list:
+        hourly_process = ParsedTableProcessing("", hourly_list)
+        hourly_process.concat_tables()
+        hourly_process._concat_df.to_sql("hourly", conn, if_exists="append", index=False)
+        logger.info("CHMU 1h saved")
 
-        # OWM air quality
-        raw = get_air_quality_OWM(API_KEY, PRAGUE_LAT, PRAGUE_LON)
-        if raw is not None:
-            clean = OWMParser(raw).parse_air_quality()    # returns dictionary
-            pd.DataFrame([clean]).to_sql("owm_pollution", conn, if_exists="append", index=False)
-            logger.info("Air quality saved")
+    # OWM weather
+    raw = get_current_weather_OWM(API_KEY, PRAGUE_LAT, PRAGUE_LON)
+    if raw is not None:
+        clean = OWMParser(raw).parse_weather()        # returns dictionary
+        pd.DataFrame([clean]).to_sql("owm_weather", conn, if_exists="append", index=False)
+        logger.info("OWM weather data saved")
 
-        # Open-Meteo hourly
-        raw = get_current_hourly_weather_OM()
-        if raw is not None:
-            clean = OpenMeteoParser(raw).parse_hourly()   # returns dictionary
-            pd.DataFrame([clean]).to_sql("open_meteo_hourly", conn, if_exists="append", index=False)
-            logger.info("Hourly data saved")
+    # OWM air quality
+    raw = get_air_quality_OWM(API_KEY, PRAGUE_LAT, PRAGUE_LON)
+    if raw is not None:
+        clean = OWMParser(raw).parse_air_quality()    # returns dictionary
+        pd.DataFrame([clean]).to_sql("owm_pollution", conn, if_exists="append", index=False)
+        logger.info("Air quality saved")
 
-    if now.hour == 8 and now.minute < 10:
+    # Open-Meteo hourly
+    raw = get_current_hourly_weather_OM()
+    if raw is not None:
+        clean = OpenMeteoParser(raw).parse_hourly()   # returns dictionary
+        pd.DataFrame([clean]).to_sql("open_meteo_hourly", conn, if_exists="append", index=False)
+        logger.info("Hourly data saved")
+
+    if now.hour < 2 :
 
         current_month = datetime.today().strftime("%Y-%m")
         conn.execute(f"DELETE FROM daily WHERE date >= '{current_month}-01'")

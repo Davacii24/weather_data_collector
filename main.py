@@ -54,25 +54,7 @@ output_dir = Path("data/raw_data")
 def main():
     conn = sqlite3.connect("data/weather.db")
 
-    OM_historical_downloader(conn)
-    batch_downloader(TENMIN_STATION_IDS, "recent", "10min", "202601",output_dir)
-    batch_downloader(LARGE_STATION_IDS, "recent", "1hour", "202601",output_dir)
-    batch_downloader(ids, "recent", "daily", "202601",output_dir)
 
-    for wsi in HISTORICAL_STATION_IDS_DAILY:
-        url = url_creator("historical","-","daily",wsi)
-        download_weather_data(output_dir,url)
-
-    for year in range(2018,2026):
-        batch_downloader(LARGE_STATION_IDS, "historical", "10min", str(year),output_dir)
-
-    for wsi in TENMIN_STATION_IDS:
-        url = url_creator("now",datetime.today().strftime("%Y%m%d"),"10m",wsi)
-        download_weather_data(output_dir,url)
-
-    for wsi in LARGE_STATION_IDS:
-        url = url_creator("now",datetime.today().strftime("%Y%m%d"),"1h",wsi)
-        download_weather_data(output_dir,url)
 
     hourly_list = []
     total_rows = 0
@@ -131,7 +113,6 @@ def main():
 
     synoptic_process = ParsedTableProcessing("data/post_process_data/" ,synoptic_list)
     synoptic_process.concat_tables()
-
 
     hourly_process._concat_df.to_sql("hourly", conn, if_exists="replace", index=False)
     minute_process._concat_df.to_sql("minute", conn, if_exists="replace", index=False)

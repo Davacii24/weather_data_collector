@@ -3,7 +3,7 @@
 .venv/
 __pycache__/
 *.pyc
-.env
+../../AppData/Roaming/JetBrains/PyCharm2025.2/scratches/.env
 .ipynb_checkpoints/
 .DS_Store
 *.egg-info/
@@ -14,3 +14,4 @@ FINISH_LATER.md
 data/weather.db
 data/post_process_data/weather_first.db
 data/post_process_data/weather_second.db
+/merger.py
