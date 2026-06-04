@@ -210,6 +210,7 @@ if __name__ == "__main__":
     if hourly_list:
         hourly_process = ParsedTableProcessing("", hourly_list)
         hourly_process.concat_tables()
+        print(hourly_process._concat_df.columns.tolist())
         hourly_process._concat_df.to_sql("hourly", conn, if_exists="append", index=False)
         logger.info("CHMU 1h saved")
 
