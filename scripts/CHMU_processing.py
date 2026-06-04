@@ -135,7 +135,7 @@ class ParsedTableProcessing:
         if "D10" in self._concat_df.columns:
             self._concat_df = self._concat_df.rename(columns=SYNOPTIC_COLUMNS)
             self._concat_df["date"] = self._concat_df["date"].dt.tz_localize(None)
-        elif "SSV1H" in self._concat_df.columns or "SSV10M" in self._concat_df.columns:
+        elif "SRA1H" in self._concat_df.columns or "SSV10M" in self._concat_df.columns:
             self._concat_df = self._concat_df.rename(columns=HIGH_FREQUENCY_COLUMNS)
         else:
             self._concat_df = self._concat_df.rename(columns=DAILY_COLUMNS)
