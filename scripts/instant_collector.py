@@ -235,38 +235,37 @@ if __name__ == "__main__":
         pd.DataFrame([clean]).to_sql("open_meteo_hourly", conn, if_exists="append", index=False)
         logger.info("Hourly data saved")
 
-    if now.hour < 2 :
 
-        current_month = datetime.today().strftime("%Y-%m")
-        conn.execute(f"DELETE FROM daily WHERE date >= '{current_month}-01'")
-        conn.execute(f"DELETE FROM synoptic WHERE date >= '{current_month}-01'")
+    current_month = datetime.today().strftime("%Y-%m")
+    conn.execute(f"DELETE FROM daily WHERE date >= '{current_month}-01'")
+    conn.execute(f"DELETE FROM synoptic WHERE date >= '{current_month}-01'")
 
-        daily_list = []
-        synoptic_list = []
+    daily_list = []
+    synoptic_list = []
 
-        for wsi in ALL_STATION_IDS:
-            url = url_creator("recent", datetime.today().strftime("%Y%m"), "daily", wsi)
-            try:
-                response = requests.get(url, timeout=30)
-                response.raise_for_status()
-                raw = response.json()
-                parser = CHMUAutoParser.from_raw(raw)
-                daily, synoptic = parser.parse()
-                daily_list.append(daily)
-                synoptic_list.append(synoptic)
-                logger.info("CHMU daily fetched for %s", wsi)
-            except requests.exceptions.RequestException as e:
-                logger.error("Failed to fetch CHMU daily for %s: %s", wsi, e)
+    for wsi in ALL_STATION_IDS:
+        url = url_creator("recent", datetime.today().strftime("%Y%m"), "daily", wsi)
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            raw = response.json()
+            parser = CHMUAutoParser.from_raw(raw)
+            daily, synoptic = parser.parse()
+            daily_list.append(daily)
+            synoptic_list.append(synoptic)
+            logger.info("CHMU daily fetched for %s", wsi)
+        except requests.exceptions.RequestException as e:
+            logger.error("Failed to fetch CHMU daily for %s: %s", wsi, e)
 
-        if daily_list:
-            daily_process = ParsedTableProcessing("", daily_list)
-            daily_process.concat_tables()
-            daily_process._concat_df.to_sql("daily", conn, if_exists="append", index=False)
+    if daily_list:
+        daily_process = ParsedTableProcessing("", daily_list)
+        daily_process.concat_tables()
+        daily_process._concat_df.to_sql("daily", conn, if_exists="append", index=False)
 
-            synoptic_process = ParsedTableProcessing("", synoptic_list)
-            synoptic_process.concat_tables()
-            synoptic_process._concat_df.to_sql("synoptic", conn, if_exists="append", index=False)
-            logger.info("CHMU daily + synoptic saved")
+        synoptic_process = ParsedTableProcessing("", synoptic_list)
+        synoptic_process.concat_tables()
+        synoptic_process._concat_df.to_sql("synoptic", conn, if_exists="append", index=False)
+        logger.info("CHMU daily + synoptic saved")
 
         # Open-Meteo daily
         raw = get_current_daily_weather_OM()
