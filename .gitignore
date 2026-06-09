@@ -1,17 +1,2 @@
-# what is written here is ignored by push to github
-
-.venv/
-__pycache__/
-*.pyc
-../../AppData/Roaming/JetBrains/PyCharm2025.2/scratches/.env
-.ipynb_checkpoints/
-.DS_Store
-*.egg-info/
-data/raw_data/
-data/post_process_data/
-FINISH_LATER.md
-*.ipynb
-data/weather.db
-data/post_process_data/weather_first.db
-data/post_process_data/weather_second.db
-/merger.py
+weather.db
+weather_live.db
