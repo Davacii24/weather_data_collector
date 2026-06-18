@@ -15,7 +15,7 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
 )
 
-df = pd.read_csv("data/raw_data/meta1.csv")
+df = pd.read_csv("data/meta1.csv")
 historic_ids,ids = station_ids(df)
 
 LARGE_STATION_IDS = [
