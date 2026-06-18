@@ -30,11 +30,6 @@ collect data from 12 meteorological stations across prague.
 - **Top 10 hottest and coldest days** on record
 - 14 static analysis charts covering air quality, soil temperature, solar radiation, pollutant composition, correlation heatmaps, and cross-validation between data sources
 
-## Authors
-
-- [Yun Lee Tzun]
-- [Tibor Nemeth]
-
 ### Guide on running the project 
 - run the main file, which should download all the data into a raw data folder
 - git pull the latests weather live data from github ( which we automatically collect)
@@ -42,7 +37,12 @@ collect data from 12 meteorological stations across prague.
 
 ### Extra comments
 - the main feature of our project is our automated dashboard with also the analysis part.
-- the secondary feature of being able to get a complete database of the prague weather is also great for custom analysis, as the local database is very rich
+- the secondary feature of being able to get a complete database of the prague weather is also great for custom analysis, as the local database is very rich\
+- we recommend to open the local database to see just the sheer volume of diffirent data and which date back to 1775.
+
+## Authors
+- [Yun Lee Tzun]
+- [Tibor Nemeth]
   
 
   
