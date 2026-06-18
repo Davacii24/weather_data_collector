@@ -50,6 +50,8 @@ output_dir = Path("data/raw_data")
 
 def main():
     conn = sqlite3.connect("data/weather.db")
+    raw_folder.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     OM_historical_downloader(conn)
 
