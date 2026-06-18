@@ -33,7 +33,7 @@ collect data from 12 meteorological stations across prague.
 ### Guide on running the project 
 - run the main file, which should download all the data into a raw data folder
 - git pull the latests weather live data from github ( which we automatically collect)
-- run the merger script to create the whole database
+- run the merger script to create the whole database to your local IDE called weather.db ( in the data folder)
 
 ### Extra comments
 - the main feature of our project is our automated dashboard with also the analysis part.
