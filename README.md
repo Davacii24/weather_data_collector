@@ -34,3 +34,15 @@ collect data from 12 meteorological stations across prague.
 
 - [Yun Lee Tzun]
 - [Tibor Nemeth]
+
+### Guide on running the project 
+- run the main file, which should download all the data into a raw data folder
+- git pull the latests weather live data from github ( which we automatically collect)
+- run the merger script to create the whole database
+
+### Extra comments
+- the main feature of our project is our automated dashboard with also the analysis part.
+- the secondary feature of being able to get a complete database of the prague weather is also great for custom analysis, as the local database is very rich
+  
+
+  
