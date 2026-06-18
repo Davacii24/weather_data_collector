@@ -1,20 +1,15 @@
-#pip install -r requirements.txt
-
-numpy
-pandas
-scikit-learn
-seaborn
-matplotlib
-beautifulsoup4
-requests
-lxml
-plotly
-streamlit
-tqdm
-pyarrow
-polars
-dotenv
-plotly
-astral
-numpy
-# NEED TO FREEZE BEFORE SUBMISSION
+numpy==2.4.4
+pandas==3.0.2
+scikit-learn==1.8.0
+seaborn==0.13.2
+matplotlib==3.10.9
+beautifulsoup4==4.14.3
+requests==2.33.1
+lxml==6.1.0
+plotly==6.7.0
+streamlit==1.56.0
+tqdm==4.67.3
+pyarrow==24.0.0
+polars==1.40.1
+python-dotenv==1.2.2
+astral==3.2
