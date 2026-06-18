@@ -6,7 +6,6 @@ from OWM_database import get_connection
 import streamlit as st
 import plotly.graph_objects as go
 
-# ── setup ───────────────────────────────────────────────────
 conn = get_connection()
 city = LocationInfo("Prague", "Czech Republic", "Europe/Prague", 50.0755, 14.4378)
 today = datetime.date.today()
@@ -35,7 +34,6 @@ def hex_to_rgba(hex_color, alpha=0.1):
     return f"rgba({r},{g},{b},{alpha})"
 
 
-# ── queries ─────────────────────────────────────────────────
 query = """
     SELECT * FROM minute
     WHERE (station, date) IN (
@@ -59,7 +57,6 @@ query_3 = f"""
     ORDER BY date ASC
 """
 
-# ── load data ───────────────────────────────────────────────
 df = (pd.read_sql_query(query, conn)
       .assign(date=lambda x: pd.to_datetime(x['date'])
               .dt.tz_localize("UTC")
@@ -74,11 +71,9 @@ df_30 = (pd.read_sql_query(query_2, conn)
 
 df_month = pd.read_sql_query(query_3, conn)
 
-# ── FIX: convert temperature columns to numeric ────────────
 for col in ["temp_min", "temp_avg", "temp_max"]:
     df_month[col] = pd.to_numeric(df_month[col], errors="coerce")
 
-# ── deltas ──────────────────────────────────────────────────
 target_time = df["date"].max() - pd.Timedelta(minutes=30)
 target_time = target_time.round("10min")
 df_prev = df_30[df_30["date"] == target_time].set_index("station")["temperature"]
@@ -88,7 +83,6 @@ print("Latest time:", df["date"].max())
 print("Target time:", target_time)
 print("Matching rows:", len(df_30[df_30["date"] == target_time]))
 
-# ── header ──────────────────────────────────────────────────
 st.header("Prague weather overview", text_alignment="center")
 
 _, date_range, sunrise, noon, sunset, _ = st.columns([1, 1, 1, 1, 1, 1], gap="small")
@@ -103,7 +97,6 @@ with sunset:
 
 st.markdown('<hr style="border: 1px solid red; margin-top: 0;">', unsafe_allow_html=True)
 
-# ── temperature cards ───────────────────────────────────────
 col1, col2, col3, col4 = st.columns(4, border=True, width="stretch", vertical_alignment="center")
 
 with col1:
@@ -123,7 +116,6 @@ with col4:
               value=f"{df[df['station'] == 'Praha-Kbely']['temperature'].values[0]}°C",
               delta=f"{round(deltas['Praha-Kbely'], 2)}°C")
 
-# ── precipitation chart ─────────────────────────────────────
 fig = go.Figure()
 
 for station, style in STATION_STYLE.items():

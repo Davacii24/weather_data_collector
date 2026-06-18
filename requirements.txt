@@ -14,5 +14,7 @@ tqdm
 pyarrow
 polars
 dotenv
-
+plotly
+astral
+numpy
 # NEED TO FREEZE BEFORE SUBMISSION

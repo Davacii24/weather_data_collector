@@ -1,42 +1,36 @@
-# Weather Prague
+# Prague Weather Data Collector & Dashboard
 
-Multi-source weather data collection and analysis for Prague.
+A fully automated weather data pipeline for Prague, collecting real-time observations from multiple sources, storing them in SQLite, and visualizing them through an interactive Streamlit dashboard. Includes 250 years of historical temperature data from the ČHMÚ Klementinum station.
 
-## Setup
+> **Live dashboard:** [https://weatherdatacollector-5t645ijfx9mmecyxvsltop.streamlit.app]
 
-1. Clone the repository:
-```bash
-git clone https://github.com/Davacii24/weather_data_collector.git
-cd weather_data_collector
-```
+---
 
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+## Data sources
 
-4. Copy the environment template and add your API keys:
-```bash
-cp .env.example .env
-```
+We have data for prague from 3 different sources. We collect them from 2 APIs(OWN and Open-Meteo) and we also 
+collect data from 12 meteorological stations across prague.
 
-## Daily Workflow
+### Automated data collection
+- GitHub Actions runs on a schedule to collect fresh weather observations
+- Data is deduplicated and stored in SQLite (`weather_live.db`)
+- The updated database is committed back to the repository automatically
+- Data is shown on the stramlit dash board.
 
-Before starting work, always pull the latest changes:
-```bash
-git pull origin main
-```
-If you made some changes which work, use this : 
-##
-| Command | What it does |
-|---|---|
-| `git status` | See which files have changed |
-| `git add .` | Stage all changed files for commit |
-| `git add <file>` | Stage a specific file only |
-| `git commit -m "your message"` | Save a snapshot with a description |
-| `git push` | Upload commits to GitHub |
 
-## Usage
+### Dashboard (Page 1 — Current weather)
+- Live temperature readings from 4 Prague stations with 30-minute delta arrows
+- Sunrise, solar noon, and sunset times
+- Temperature trend chart with min/max bands across all stations (past 30 days)
+- Precipitation bar chart by station
 
-TBD
+### Analysis (Page 2 — Historical)
+- **250-year temperature trend** with interactive rolling average (1775–2026)
+- **Extreme temperature days by period** — hot vs cold days grouped by 20-year periods
+- **Top 10 hottest and coldest days** on record
+- 14 static analysis charts covering air quality, soil temperature, solar radiation, pollutant composition, correlation heatmaps, and cross-validation between data sources
 
+## Authors
+
+- [Yun Lee Tzun]
+- [Tibor Nemeth]

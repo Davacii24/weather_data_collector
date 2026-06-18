@@ -1,2 +1,4 @@
 weather.db
 weather_live.db
+/data/raw_data/
+/data/post_process_data/

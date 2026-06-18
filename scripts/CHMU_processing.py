@@ -3,7 +3,6 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-
 class ParsedTableProcessing:
     """
     This class takes a raw tables from the parser and processes them, renames them, and cocatinates them thogheter into
