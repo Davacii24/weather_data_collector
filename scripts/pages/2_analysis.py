@@ -22,6 +22,10 @@ daily_avg, extremes = load_data()
 st.header("Weather data analysis", text_alignment="center")
 st.markdown('<hr style="border: 1px solid red; margin-top: 0;">', unsafe_allow_html=True)
 
+if st.button("Refresh data"):
+    st.cache_data.clear()
+    st.rerun()
+
 with st.container(border=True):
     st.markdown("#### Average temperature trend 1775–2026")
     st.caption("Data source: ČHMÚ daily · 10-year rolling average across all stations")
