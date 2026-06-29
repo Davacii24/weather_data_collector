@@ -1,36 +1,31 @@
 name: Collect Weather Data
-
 on:
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
-
 jobs:
   collect:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Install dependencies
         run: pip install requests python-dotenv pandas
-      
       - name: Run instant collector
         env:
           OWM_API_KEY: ${{ secrets.OWM_API_KEY }}
         run: PYTHONPATH=. python scripts/instant_collector.py
-
+      - name: Update historical CSV with live data
+        run: PYTHONPATH=. python scripts/export_historical.py
       - name: Commit updated database
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data/weather_live.db
+          git add data/weather_live.db data/daily_avg_historical.csv
           git commit -m "auto: collect weather $(date -u '+%Y-%m-%d %H:%M')" || echo "No changes"
           git pull --rebase
           git push
